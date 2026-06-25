@@ -1,0 +1,9 @@
+okx-cli
+*.test
+.DS_Store
+
+# Local secrets / env (never commit API credentials)
+.env
+*.env
+env.sh
+.secrets
