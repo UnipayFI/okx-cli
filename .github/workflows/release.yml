@@ -1,0 +1,128 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: windows
+            goarch: amd64
+            platform: windows
+            arch: x86_64
+            ext: .exe
+          - goos: linux
+            goarch: amd64
+            platform: linux
+            arch: x86_64
+            ext: ""
+          - goos: linux
+            goarch: arm64
+            platform: linux
+            arch: arm64
+            ext: ""
+          - goos: darwin
+            goarch: amd64
+            platform: macos
+            arch: x86_64
+            ext: ""
+          - goos: darwin
+            goarch: arm64
+            platform: macos
+            arch: arm64
+            ext: ""
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.26'
+
+    - name: Get tag name
+      id: tag
+      run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Build binary
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+        CGO_ENABLED: 0
+      run: |
+        go build -ldflags "-X github.com/UnipayFI/okx-cli/version.version=${{ steps.tag.outputs.tag }} -X github.com/UnipayFI/okx-cli/version.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -o okx-cli${{ matrix.ext }}
+
+    - name: Create package
+      run: |
+        mkdir -p dist
+        tar -czf dist/okx-cli-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz okx-cli${{ matrix.ext }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: okx-cli-${{ matrix.platform }}-${{ matrix.arch }}
+        path: dist/okx-cli-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Get tag name
+      id: tag
+      run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
+
+    - name: Prepare release assets
+      run: |
+        mkdir -p release-assets
+        find ./artifacts -name "*.tar.gz" -exec cp {} release-assets/ \;
+        ls -la release-assets/
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag.outputs.tag }}
+        name: ${{ steps.tag.outputs.tag }}
+        draft: false
+        prerelease: false
+        files: release-assets/*
+        body: |
+          ## Release ${{ steps.tag.outputs.tag }}
+
+          ### Downloads
+
+          | Platform | Architecture | Download |
+          |----------|--------------|----------|
+          | Windows | x86_64 | [okx-cli-windows-x86_64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/okx-cli-windows-x86_64.tar.gz) |
+          | Linux | x86_64 | [okx-cli-linux-x86_64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/okx-cli-linux-x86_64.tar.gz) |
+          | Linux | arm64 | [okx-cli-linux-arm64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/okx-cli-linux-arm64.tar.gz) |
+          | macOS | x86_64 | [okx-cli-macos-x86_64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/okx-cli-macos-x86_64.tar.gz) |
+          | macOS | arm64 | [okx-cli-macos-arm64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/okx-cli-macos-arm64.tar.gz) |
+
+          ### Installation
+
+          1. Download the appropriate package for your platform
+          2. Extract the archive: `tar -xzf okx-cli-{platform}-{arch}.tar.gz`
+          3. Make executable (Linux/macOS): `chmod +x okx-cli`
+          4. Set up environment variables:
+             ```bash
+             export OKX_API_KEY="your_api_key"
+             export OKX_API_SECRET="your_api_secret"
+             export OKX_PASSPHRASE="your_passphrase"
+             ```
+          5. Run: `./okx-cli --help`
+      env:
+        GITHUB_TOKEN: ${{ secrets.API_TOKEN }}
