@@ -7,3 +7,5 @@ okx-cli
 *.env
 env.sh
 .secrets
+
+.workflows/
