@@ -20,7 +20,8 @@ spot and every futures line; commands are grouped by product:
 
 Credentials are read from the environment:
   OKX_API_KEY, OKX_API_SECRET, OKX_PASSPHRASE   (required)
-  OKX_PROXY, OKX_BASE_URL, OKX_DEMO             (optional)
+  OKX_BASE_URL, OKX_DEMO                         (optional)
+  HTTPS_PROXY / ALL_PROXY                        (optional proxy)
 
 Use --json on any command for the raw API response.
 

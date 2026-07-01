@@ -41,10 +41,15 @@ export OKX_API_SECRET="..."      # API secret
 export OKX_PASSPHRASE="..."      # passphrase set when the key was created
 
 # Optional
-export OKX_PROXY="socks5://127.0.0.1:1080"   # route REST traffic through a proxy
-export OKX_BASE_URL="https://www.okx.com"    # override REST base URL
-export OKX_DEMO="true"                        # use demo (paper) trading
+export HTTPS_PROXY="socks5://127.0.0.1:1080"  # route REST traffic through a proxy
+export OKX_BASE_URL="https://www.okx.com"     # override REST base URL
+export OKX_DEMO="true"                         # use demo (paper) trading
 ```
+The standard proxy variables are honored with curl-compatible, scheme-aware
+precedence: OKX REST is HTTPS-only, so `HTTPS_PROXY` takes precedence, then
+`ALL_PROXY` (uppercase preferred over lowercase for each). `HTTP_PROXY` governs
+plain `http://` traffic only and therefore does not apply to the OKX endpoint.
+Supported schemes: `http`, `https`, `socks5`, `socks5h`.
 
 > OKX rejects requests whose timestamp is skewed more than 30s from server
 > time; the CLI best-effort syncs the server clock on every invocation.
