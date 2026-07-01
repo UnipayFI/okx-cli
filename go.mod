@@ -3,7 +3,7 @@ module github.com/UnipayFI/okx-cli
 go 1.26.0
 
 require (
-	github.com/UnipayFI/go-okx v0.20260623.2
+	github.com/UnipayFI/go-okx v0.20260630.0
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/cobra v1.9.1
@@ -11,7 +11,7 @@ require (
 
 require (
 	github.com/fatih/color v1.15.0 // indirect
-	github.com/go-json-experiment/json v0.0.0-20260504200034-64a0a05799db // indirect
+	github.com/go-json-experiment/json v0.0.0-20260623181947-01eb4420fa68 // indirect
 	github.com/go-resty/resty/v2 v2.17.2 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
