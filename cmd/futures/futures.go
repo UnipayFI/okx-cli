@@ -40,7 +40,7 @@ Docs Link: https://www.okx.com/docs-v5/en/#trading-account-rest-api-get-balance`
 * --posSide (long/short) is required in hedge mode
 * --tdMode defaults to cross
 
-Docs Link: ` + docBase + "order",
+Docs Link: ` + docBase + "place-order",
 		RunE: createOrder,
 	}
 

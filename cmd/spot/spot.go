@@ -39,7 +39,7 @@ Docs Link: https://www.okx.com/docs-v5/en/#trading-account-rest-api-get-balance`
 * --px is required for limit orders
 * --tgtCcy sets the market-order size unit: base_ccy or quote_ccy
 
-Docs Link: ` + docBase + "order",
+Docs Link: ` + docBase + "place-order",
 		RunE: createOrder,
 	}
 
