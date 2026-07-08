@@ -86,6 +86,34 @@ Docs Link: https://www.okx.com/docs-v5/en/#trading-account-rest-api-get-position
 		RunE: listPositions,
 	}
 
+	posModeCmd = &cobra.Command{
+		Use:   "posMode",
+		Short: "Show and set the account position mode",
+	}
+
+	posModeGetCmd = &cobra.Command{
+		Use:   "get",
+		Short: "Show the current position mode",
+		Long: `Show the account-wide position mode for derivatives:
+long_short_mode (hedge, separate long/short positions) or net_mode (one-way).
+
+Docs Link: https://www.okx.com/docs-v5/en/#trading-account-rest-api-get-account-configuration`,
+		RunE: getPosMode,
+	}
+
+	posModeSetCmd = &cobra.Command{
+		Use:   "set",
+		Short: "Set the position mode (long_short / net)",
+		Long: `Set the account-wide position mode for derivatives.
+* Required: --posMode — long_short (hedge, separate long/short positions)
+  or net (one-way)
+* OKX rejects the switch while the account holds open positions or pending
+  orders under FUTURES/SWAP
+
+Docs Link: https://www.okx.com/docs-v5/en/#trading-account-rest-api-set-position-mode`,
+		RunE: setPosMode,
+	}
+
 	closeCmd = &cobra.Command{
 		Use:   "close",
 		Short: "Market-close a position",
@@ -135,9 +163,13 @@ func InitCmds() []*cobra.Command {
 	closeCmd.Flags().Bool("autoCxl", false, "cancel pending orders that block the close")
 	closeCmd.MarkFlagRequired("instId")
 
+	posModeSetCmd.Flags().StringP("posMode", "P", "", "position mode: long_short (hedge), net (one-way) (required)")
+	posModeSetCmd.MarkFlagRequired("posMode")
+
 	orderCmd.AddCommand(createCmd, cancelCmd, getCmd, openCmd)
 	positionCmd.AddCommand(positionListCmd, closeCmd)
-	return []*cobra.Command{healthCmd, orderCmd, positionCmd}
+	posModeCmd.AddCommand(posModeGetCmd, posModeSetCmd)
+	return []*cobra.Command{healthCmd, orderCmd, positionCmd, posModeCmd}
 }
 
 // resolveInstType reads the inherited persistent --instType flag (default swap).
@@ -282,6 +314,31 @@ func listPositions(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	printer.Print(exchange.Positions(positions))
+	return nil
+}
+
+func getPosMode(_ *cobra.Command, _ []string) error {
+	cfg, err := exchange.NewClient().GetAccountConfig()
+	if err != nil {
+		return err
+	}
+	view := exchange.PositionModeView{PositionMode: exchange.PosMode(cfg.PositionMode)}
+	printer.Print(&view)
+	return nil
+}
+
+func setPosMode(cmd *cobra.Command, _ []string) error {
+	raw, _ := cmd.Flags().GetString("posMode")
+	mode, err := exchange.ParsePosMode(raw)
+	if err != nil {
+		return err
+	}
+	res, err := exchange.NewClient().SetPositionMode(mode)
+	if err != nil {
+		return err
+	}
+	view := exchange.PositionModeView(*res)
+	printer.Print(&view)
 	return nil
 }
 

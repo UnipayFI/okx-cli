@@ -31,6 +31,7 @@ type (
 	MgnMode  = okx.MgnMode
 	TgtCcy   = okx.TgtCcy
 	OrdState = okx.OrdState
+	PosMode  = okx.PosMode
 )
 
 const (
@@ -38,6 +39,9 @@ const (
 	InstTypeSwap    = okx.InstTypeSwap
 	InstTypeFutures = okx.InstTypeFutures
 	InstTypeMargin  = okx.InstTypeMargin
+
+	PosModeLongShort = okx.PosModeLongShort
+	PosModeNet       = okx.PosModeNet
 )
 
 // Client is the authenticated wrapper around the SDK's unified (v5) client.
@@ -158,6 +162,19 @@ func ParsePosSide(s string) (okx.PosSide, error) {
 		return okx.PosSideNet, nil
 	default:
 		return "", fmt.Errorf("invalid posSide %q: want one of long, short, net", s)
+	}
+}
+
+// ParsePosMode resolves a position-mode string (with friendly aliases) to the
+// SDK enum (case-insensitive).
+func ParsePosMode(s string) (okx.PosMode, error) {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "long_short", "long_short_mode", "hedge", "dual":
+		return okx.PosModeLongShort, nil
+	case "net", "net_mode", "one_way", "oneway":
+		return okx.PosModeNet, nil
+	default:
+		return "", fmt.Errorf("invalid posMode %q: want long_short (hedge) or net (one-way)", s)
 	}
 }
 

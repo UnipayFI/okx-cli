@@ -10,7 +10,7 @@ Commands are grouped by product:
 - **account** — identity & permissions, aggregate balance/equity, and account
   health (margin ratio).
 - **spot** — per-coin assets and spot order entry (create / cancel / get / open).
-- **futures** — account health, futures order entry and positions (list / close).
+- **futures** — account health, futures order entry, positions (list / close) and the account position mode (posMode get / set).
 
 Authentication uses OKX's HMAC-SHA256 signing scheme (`OK-ACCESS-KEY` /
 `OK-ACCESS-SIGN` / `OK-ACCESS-TIMESTAMP` / `OK-ACCESS-PASSPHRASE`). Only
@@ -102,6 +102,10 @@ The product line is selected with the persistent `--instType` flag (default
 
 ./okx-cli futures position list                    # list open positions
 ./okx-cli futures position close -s BTC-USDT-SWAP -m cross   # market-close
+
+./okx-cli futures posMode get                      # show the account position mode
+./okx-cli futures posMode set -P long_short        # hedge mode (separate long/short)
+./okx-cli futures posMode set -P net               # one-way mode
 ```
 
 ## License

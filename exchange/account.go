@@ -20,6 +20,15 @@ func (c *Client) GetAccountConfig() (*okx.AccountConfig, error) {
 	return c.okx.NewGetAccountConfigService().Do(cx)
 }
 
+// SetPositionMode sets the account-wide position mode for derivatives:
+// long/short (hedge) or net (one-way). OKX rejects the switch while the account
+// holds open positions or pending orders.
+func (c *Client) SetPositionMode(mode PosMode) (*okx.PositionMode, error) {
+	cx, cancel := ctx()
+	defer cancel()
+	return c.okx.NewSetPositionModeService(mode).Do(cx)
+}
+
 // GetPositionRisk returns a risk snapshot (balances + positions) for an
 // instrument type. An empty instType returns risk across all products.
 func (c *Client) GetPositionRisk(instType InstType) (*okx.AccountPositionRisk, error) {
@@ -43,6 +52,17 @@ func (a *AccountConfigView) Header() []string {
 
 func (a *AccountConfigView) Row() [][]any {
 	return [][]any{{a.UID, a.AccountLevel, a.PositionMode, a.KYCLevel, a.Perm}}
+}
+
+// PositionModeView renders the account-wide position mode.
+type PositionModeView okx.PositionMode
+
+func (p *PositionModeView) Header() []string {
+	return []string{"Position Mode"}
+}
+
+func (p *PositionModeView) Row() [][]any {
+	return [][]any{{p.PositionMode}}
 }
 
 // BalanceSummary renders the unified account's aggregate equity and margin.
