@@ -3,7 +3,7 @@ module github.com/UnipayFI/okx-cli
 go 1.27.3
 
 require (
-	github.com/UnipayFI/go-okx v0.20261027.1
+	github.com/UnipayFI/go-okx v0.20261113.0
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/cobra v1.9.1
